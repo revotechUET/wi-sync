@@ -8,11 +8,20 @@
       "prefix": "wi1004_"
     },
     "cloud": {
-      "host": "",
-      "port": "3306",
-      "user": "",
-      "password": "",
+      "host": "192.168.0.6",
+      "port": "32236",
+      "user": "hoangbd",
+      "password": "@Abc123456",
       "prefix": "wi1004_"
     }
+  },
+  "mongo": {
+    "host": "127.0.0.1",
+    "port": "27017",
+    "queueDataBase": "syncMysqlQueue"
+  },
+  "mqtt": {
+    "local": "mqtt://localhost:1883",
+    "cloud": "wss://mqtt-broker.i2g.cloud"
   }
 }
