@@ -209,41 +209,25 @@ function run(store, connections) {
         return;
     }
 
+    console.log('Mongo queue init successfully');
+
     let OrderingQueue = require('./src/helper/OrderingQueue.helper');
     let orderingQueueLocal = new OrderingQueue(localQueue);
     let orderingQueueCloud = new OrderingQueue(cloudQueue);
     orderingQueueLocal.run();
     orderingQueueCloud.run();
 
+    console.log('Ordering queue init successfully');
+
     let getClientId = require('./src/helper/getClientId.helper');
     let getSyncDatabaseName = require('./src/helper/getSyncDatabaseName.helper');
     let databaseName = getSyncDatabaseName();
 
-    let mqtt = require('mqtt');
-    let clientLocal = mqtt.connect(config.get("mqtt.local"), {clean: false, clientId: getClientId()});
-    let clientCloud = mqtt.connect(config.get("mqtt.cloud"), {clean: false, clientId: getClientId(), rejectUnauthorized: false});
 
-    clientLocal.subscribe('sync/' + databaseName, {qos: 2});
+    let MqttListener = require('./src/MqttListener/MqttListener');
 
-    clientLocal.on('connected', ()=> {
-        console.log('local connected');
-    });
-
-    clientLocal.on('message', (topic, payload) => {
-        payload = payload.toString();
-        orderingQueueLocal.push(payload);
-    });
-
-    clientCloud.subscribe('sync/' + databaseName, {qos: 2});
-
-    clientCloud.on('connected', ()=> {
-        console.log('cloud connected');
-    });
-
-    clientCloud.on('message', (topic, payload) => {
-        payload = payload.toString();
-        orderingQueueCloud.push(payload);
-    });
+    new MqttListener(orderingQueueLocal, config.get("mqtt.local"), {clean: false, clientId: getClientId()});
+    new MqttListener(orderingQueueCloud, config.get("mqtt.cloud"), {clean: false, clientId: getClientId(), rejectUnauthorized: false});
 
     let MySqlExecutor = require("./src/MySqlExecutor/mysqlExecutor");
 
@@ -268,6 +252,8 @@ function run(store, connections) {
 
     cloudMySqlExecutor.run();
     localMySqlExecutor.run();
+
+    console.log('Start synchronize server');
 
 })();
 

@@ -29,7 +29,8 @@ async function importToDatabase(config, databaseName, fileLink) {
         user: config.user,
         password: config.password,
         database: databaseName,
-        port: config.port
+        port: config.port,
+        supportBigNumbers: true
     }).import(fileLink);
 }
 
