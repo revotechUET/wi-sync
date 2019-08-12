@@ -4,6 +4,7 @@
   "description": "sync database for i2g project",
   "main": "app.js",
   "dependencies": {
+    "axios": "^0.19.0",
     "body-parser": "^1.19.0",
     "config": "^3.1.0",
     "express": "^4.17.1",
@@ -11,7 +12,8 @@
     "mqtt": "^3.0.0",
     "mysql-import": "^2.0.2",
     "mysqldump": "^3.0.0",
-    "sequelize": "^5.10.1"
+    "sequelize": "^5.10.1",
+    "unzip": "^0.1.11"
   },
   "devDependencies": {},
   "scripts": {

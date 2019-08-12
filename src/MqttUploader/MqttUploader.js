@@ -7,13 +7,16 @@ class MqttUploader {
         this.channel = "syncUp/";
         this.database = database;
         this.connectState = false;
-        this.client = mqtt.connect(require("config").get("mqtt.cloud"));
+        this.client = mqtt.connect(require("config").get("mqtt.cloud"), {rejectUnauthorized: false});
         this.client.on('connect', ()=>{
             this.setStateOn();
         });
 
         this.client.on('offline', ()=>{
             this.setStateOff();
+        });
+        this.client.on('error', (e)=>{
+            console.log('Mqtt uploader error:', e.message);
         });
     }
 
@@ -31,7 +34,7 @@ class MqttUploader {
         let handleRun = async function() {
             if (self.queue.length > 0) {
                 let data = self.queue.pop();
-                self.client.publish(self.channel + this.database, data.value.toString(), {qos: 2}, (err) => {
+                self.client.publish(self.channel + self.database, data.toString(), {qos: 2}, (err) => {
                     if (err) self.queue.push(data);
                     if (self.connectState) {
                         setTimeout(handleRun, 0);
@@ -49,3 +52,5 @@ class MqttUploader {
     }
 
 }
+
+module.exports = MqttUploader;

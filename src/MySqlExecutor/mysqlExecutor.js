@@ -16,7 +16,7 @@ class MySqlExecutor {
         }, 5*60*1000);
     }
 
-    async getConnection() {
+    getConnection() {
         return new Promise(async (resolve,reject)=>{
             if (this.connection) {
                 this.connection.time = Date.now();

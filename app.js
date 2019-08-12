@@ -3,7 +3,7 @@
 // const app = express();
 // const bodyParser = require('body-parser');
 //
-const apiFunc = require('./src/router/mysql-sync/mysql.api');
+// const apiFunc = require('./src/router/mysql-sync/mysql.api');
 //
 // const exec = require('./src/helper/shellExec.helper');
 
@@ -70,46 +70,46 @@ const apiFunc = require('./src/router/mysql-sync/mysql.api');
 //     }
 // })();
 
-function updateToCloud(connection, payload) {
-    return new Promise((rel, rej)=>{
-        connection.execute(payload, (err, res)=>{
-            if (err) {
-                rej(err);
-            } else {
-                rel(0);
-            }
-        });
-    });
-}
+// function updateToCloud(connection, payload) {
+//     return new Promise((rel, rej)=>{
+//         connection.execute(payload, (err, res)=>{
+//             if (err) {
+//                 rej(err);
+//             } else {
+//                 rel(0);
+//             }
+//         });
+//     });
+// }
 
-function run(store, connections) {
-    return new Promise((resolve,reject)=>{
-        // // let interval = setInterval(()=>{
-        // //   if (!store.state) {
-        // //     clearInterval(interval);
-        // //     resolve(true);
-        // //   }
-        // //   else if (store.queue.length > 0) {
-        // //     let data = store.queue.pop();
-        // //     client.publish(pushChanel,JSON.stringify(data),{qos:2},(err)=>{
-        // //       if (err) store.queue.push(data);
-        // //     });
-        // //   }
-        // },200);
-        let handleRun = function() {
-            if (store.length > 0) {
-                let stmt = store.shift();
-                connections.execute(stmt, (err, res)=>{
-                    if(err) {
-                        console.log(err);
-                    }
-                });
-            }
-            setTimeout(handleRun,10);
-        }
-        setTimeout(handleRun,10);
-    });
-}
+// function run(store, connections) {
+//     return new Promise((resolve,reject)=>{
+//         // // let interval = setInterval(()=>{
+//         // //   if (!store.state) {
+//         // //     clearInterval(interval);
+//         // //     resolve(true);
+//         // //   }
+//         // //   else if (store.queue.length > 0) {
+//         // //     let data = store.queue.pop();
+//         // //     client.publish(pushChanel,JSON.stringify(data),{qos:2},(err)=>{
+//         // //       if (err) store.queue.push(data);
+//         // //     });
+//         // //   }
+//         // },200);
+//         let handleRun = function() {
+//             if (store.length > 0) {
+//                 let stmt = store.shift();
+//                 connections.execute(stmt, (err, res)=>{
+//                     if(err) {
+//                         console.log(err);
+//                     }
+//                 });
+//             }
+//             setTimeout(handleRun,10);
+//         }
+//         setTimeout(handleRun,10);
+//     });
+// }
 
 // (async function () {
 //     let mqtt = require('mqtt');
@@ -212,12 +212,11 @@ function run(store, connections) {
     console.log('Mongo queue init successfully');
 
     let OrderingQueue = require('./src/helper/OrderingQueue.helper');
-    let orderingQueueLocal = new OrderingQueue(localQueue);
+    //let orderingQueueLocal = new OrderingQueue(localQueue);
     let orderingQueueCloud = new OrderingQueue(cloudQueue);
-    orderingQueueLocal.run();
+    //orderingQueueLocal.run();
     orderingQueueCloud.run();
 
-    console.log('Ordering queue init successfully');
 
     let getClientId = require('./src/helper/getClientId.helper');
     let getSyncDatabaseName = require('./src/helper/getSyncDatabaseName.helper');
@@ -225,9 +224,17 @@ function run(store, connections) {
 
 
     let MqttListener = require('./src/MqttListener/MqttListener');
+    let CurveMqttListener = require('./src/MqttListener/CurveMqttListener');
+    let MqttUploader = require('./src/MqttUploader/MqttUploader');
+    let curveStatusController = require('./src/CurveStatusUpdater/CurveStatusController');
+    console.log(databaseName);
 
-    new MqttListener(orderingQueueLocal, config.get("mqtt.local"), {clean: false, clientId: getClientId()});
+    let localMqttQueue = new MqttUploader(databaseName);
+
+    //new MqttListener(orderingQueueLocal, config.get("mqtt.local"), {clean: false, clientId: getClientId()});
+    new MqttListener(localMqttQueue, config.get("mqtt.local"), {clean: false, clientId: getClientId()});
     new MqttListener(orderingQueueCloud, config.get("mqtt.cloud"), {clean: false, clientId: getClientId(), rejectUnauthorized: false});
+    new CurveMqttListener(curveStatusController, config.get("mqtt.local"), {clean: false, clientId: getClientId() + 'curveChannel', rejectUnauthorized: false});
 
     let MySqlExecutor = require("./src/MySqlExecutor/mysqlExecutor");
 
@@ -247,10 +254,10 @@ function run(store, connections) {
         database: databaseName
     };
 
-    let cloudMySqlExecutor = new MySqlExecutor(cloudSqlConfig, localQueue);
+    // let cloudMySqlExecutor = new MySqlExecutor(cloudSqlConfig, localQueue);
     let localMySqlExecutor = new MySqlExecutor(localSqlConfig, cloudQueue);
 
-    cloudMySqlExecutor.run();
+    // cloudMySqlExecutor.run();
     localMySqlExecutor.run();
 
     console.log('Start synchronize server');
