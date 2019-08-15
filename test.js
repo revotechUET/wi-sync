@@ -37,19 +37,28 @@ function devideArr(arr, chunkSize) {
 }
 
 
+let downloadCurves = require('./src/helper/download-curve-runner');
+
 (async function () {
     try {
-        let curvePaths = await func(config.get("mysql.local"), 'hungson');
+        let userName = process.argv.slice(2)[0];
+        let curvePaths = await func(config.get("mysql.local"), userName);
         console.log('Start download...');
         let smallerCurvePaths = devideArr(curvePaths, 100);
-        let n = smallerCurvePaths.length;  
-        for (let i = 0; i < n; i++) {
-                getCurveFiles(smallerCurvePaths[i], i+1).then((res)=>{
-                    res.data.pipe(fs.createWriteStream('curvedownload'+i+'.zip'));
-                }).catch((e)=>{
-                    console.log('Download curve part', i, 'failed:', e.message);
-                });
-        }
+        downloadCurves(smallerCurvePaths);
+        // let n = smallerCurvePaths.length; 
+        // let count = 0;
+        // for (let i = 0; i < n; i++) {
+        //         getCurveFiles(smallerCurvePaths[i], i+1).then((res)=>{
+        //             let downloadStatus = res.data.pipe(fs.createWriteStream('downloads/curvedownload'+i+'.zip'));
+        //             downloadStatus.on('close',()=>{
+        //                 count += 1;
+        //                 console.log('Finish download part ' + i + ': done ' + count + '/' + n + ' part');
+        //             });
+        //         }).catch((e)=>{
+        //             console.log('Download curve part', i, 'failed:', e.message);
+        //         });
+        // }
     } catch (e) {
         console.log(e.message);
     }

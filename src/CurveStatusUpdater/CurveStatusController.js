@@ -1,5 +1,4 @@
 let CurveStatus = require('./curve-status.model').model;
-const axios = require('axios');
 
 class CurveStatusController {
     constructor() {
@@ -15,17 +14,6 @@ class CurveStatusController {
     pushUpdateEvent(mess) {
         mess.eventType = 'update';
         this.queue.unshift(mess);
-    }
-
-    runCheckUpdate() {
-        let self = this;
-        let handleRun = async function() {
-            let user = "phuc";
-            // try {
-            //     let response = 
-            // }
-        };
-        setTimeout(handleRun, 0);
     }
 
     runUpdateEventIntoDatabase() {
@@ -51,7 +39,7 @@ class CurveStatusController {
         return new Promise((resolve, reject) => {
             if (mess.eventType.toString() === 'delete') {
                 //try to delete
-                console.log('Run it');
+                console.log(mess);
                 CurveStatus.findOneAndDelete({path: mess.curvePath}, (err, rs)=>{
                     console.log(rs);
                     if (err) {

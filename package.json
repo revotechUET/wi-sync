@@ -13,7 +13,7 @@
     "mysql-import": "^2.0.2",
     "mysqldump": "^3.0.0",
     "sequelize": "^5.10.1",
-    "unzip": "^0.1.11"
+    "unzip-stream": "^0.3.0"
   },
   "devDependencies": {},
   "scripts": {
