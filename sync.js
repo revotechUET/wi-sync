@@ -1,4 +1,9 @@
 const apiFunc = require('./src/router/mysql-sync/mysql.api');
+let uploadCurve = require('./src/helper/upload-curve');
+const divideArr = require('./src/helper/divideArr.helper');
+const downloadCurves = require('./src/helper/download-curve-runner');
+let getCurve = require('./src/helper/get-curve');
+
 
 (async function() {
     let userName = process.argv.slice(2)[0];
@@ -42,6 +47,11 @@ const apiFunc = require('./src/router/mysql-sync/mysql.api');
         let fs = require('fs');
         fs.unlinkSync(mergedFile);
         console.log('Finish clean temp file');
+        console.log('Start searching curve exist in database...');
+        let curvePaths = await getCurve(config.get("mysql.local"), userName);
+        console.log('Start download curve...');
+        let smallerCurvePaths = divideArr(curvePaths, 100);
+        downloadCurves(smallerCurvePaths);
     } catch (e) {
         console.log('Error in sync: ', e);
         console.log('Sync failed')

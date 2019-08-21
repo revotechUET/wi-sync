@@ -5,7 +5,7 @@ let fs = require('fs');
 let uploadCurve = require('./src/helper/upload-curve');
 const divideArr = require('./src/helper/divideArr.helper');
 
-uploadCurve(['/00c6d133/d493a7d1/c81d2c27/9df7c759/DPL.txt', '/00ca7add/9f56a682/d9b20e99/8f9c1426/RXOZ_CS_1.txt'], JSON.stringify({path: '/00c6d133/d493a7d1/c81d2c27/9df7c759/DPL.txt', updatedAt: new Date()})).then(res=>console.log(res)).catch(e=>console.log(e.message));
+//uploadCurve(['/00c6d133/d493a7d1/c81d2c27/9df7c759/DPL.txt', '/00ca7add/9f56a682/d9b20e99/8f9c1426/RXOZ_CS_1.txt'], JSON.stringify({path: '/00c6d133/d493a7d1/c81d2c27/9df7c759/DPL.txt', updatedAt: new Date()})).then(res=>console.log(res)).catch(e=>console.log(e.message));
 
 // function getCurveFiles(curvePaths,i) {
 //     return axios({
@@ -35,29 +35,29 @@ uploadCurve(['/00c6d133/d493a7d1/c81d2c27/9df7c759/DPL.txt', '/00ca7add/9f56a682
 
 
 
-// let downloadCurves = require('./src/helper/download-curve-runner');
+let downloadCurves = require('./src/helper/download-curve-runner');
 
-// (async function () {
-//     try {
-//         let userName = process.argv.slice(2)[0];
-//         let curvePaths = await func(config.get("mysql.local"), userName);
-//         console.log('Start download...');
-//         let smallerCurvePaths = divideArr(curvePaths, 100);
-//         downloadCurves(smallerCurvePaths);
-//         // let n = smallerCurvePaths.length; 
-//         // let count = 0;
-//         // for (let i = 0; i < n; i++) {
-//         //         getCurveFiles(smallerCurvePaths[i], i+1).then((res)=>{
-//         //             let downloadStatus = res.data.pipe(fs.createWriteStream('downloads/curvedownload'+i+'.zip'));
-//         //             downloadStatus.on('close',()=>{
-//         //                 count += 1;
-//         //                 console.log('Finish download part ' + i + ': done ' + count + '/' + n + ' part');
-//         //             });
-//         //         }).catch((e)=>{
-//         //             console.log('Download curve part', i, 'failed:', e.message);
-//         //         });
-//         // }
-//     } catch (e) {
-//         console.log(e.message);
-//     }
-// })();
+(async function () {
+    try {
+        let userName = process.argv.slice(2)[0];
+        let curvePaths = await func(config.get("mysql.local"), userName);
+        console.log('Start download...');
+        let smallerCurvePaths = divideArr(curvePaths, 100);
+        downloadCurves(smallerCurvePaths);
+        // let n = smallerCurvePaths.length; 
+        // let count = 0;
+        // for (let i = 0; i < n; i++) {
+        //         getCurveFiles(smallerCurvePaths[i], i+1).then((res)=>{
+        //             let downloadStatus = res.data.pipe(fs.createWriteStream('downloads/curvedownload'+i+'.zip'));
+        //             downloadStatus.on('close',()=>{
+        //                 count += 1;
+        //                 console.log('Finish download part ' + i + ': done ' + count + '/' + n + ' part');
+        //             });
+        //         }).catch((e)=>{
+        //             console.log('Download curve part', i, 'failed:', e.message);
+        //         });
+        // }
+    } catch (e) {
+        console.log(e.message);
+    }
+})();

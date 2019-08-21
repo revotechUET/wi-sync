@@ -48,6 +48,7 @@ function uploadCurves(curvePaths, curveUpdateInfo) {
                     fs.unlinkSync(outputName);
                 } else {
                     reject({message: res.reason});
+                    fs.unlinkSync(outputName);
                 }
             }).catch(e=>{
                 reject(e);
