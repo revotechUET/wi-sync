@@ -2,7 +2,7 @@ const mqtt = require('mqtt');
 const getSyncDatabaseName = require('./../helper/getSyncDatabaseName.helper');
 
 class MqttListener {
-    constructor(output, url, options) {
+    constructor(output, url, options, subcribeChannel) {
         this.url = url;
         this.options = options;
         this.output = output;
@@ -10,6 +10,7 @@ class MqttListener {
         this.databaseName = getSyncDatabaseName();
         this.assign();
         this.timeStamp = 0;
+        this.subcribeChannel = subcribeChannel || 'sync';
     }
 
     reconnect() {
@@ -42,7 +43,7 @@ class MqttListener {
                 console.log('Mqtt connection error:', e.message);
             }
         });
-        this.client.subscribe("sync/" + this.databaseName, {qos:2});
+        this.client.subscribe(this.subcribeChannel + '/' + this.databaseName, {qos:2});
         this.client.on('message', (topic, payload)=>{
             this.output.push(payload.toString());
         });

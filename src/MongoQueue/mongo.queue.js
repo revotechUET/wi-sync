@@ -32,7 +32,7 @@ class MongoQueue {
                                     this.tail = tailRs;
                                     resolve(null);
                                 } else {
-                                    reject('Error. Lost tail. Delete mongo db');
+                                    reject({message: 'Error. Lost tail. Delete mongo db'});
                                 }
                             }
                         });
@@ -44,14 +44,14 @@ class MongoQueue {
         });
     }
 
-    enqueue(sql) {
+    enqueue(value) {
         return new Promise((resolve, reject)=>{
             let node = new this.Node({
-                value: sql
+                value: value
             });
             if (this.head) {
                 node.next = this.head._id;
-                node.save((err, nodeRs) => {
+                node.save((err, nodeRs) => { 
                     if (err) {
                         reject(err);
                     } else {

@@ -1,7 +1,8 @@
 let CurveStatus = require('./curve-status.model').model;
 
 class CurveStatusController {
-    constructor() {
+    constructor(deleteOutputQueue) {
+        this.deleteOutputQueue = deleteOutputQueue;
         this.queue = [];
         this.runUpdateEventIntoDatabase();
     }
@@ -28,18 +29,18 @@ class CurveStatusController {
                 }
                 setTimeout(handleRun,0);
             } else {
-                setTimeout(handleRun,50);
+                setTimeout(handleRun, 1000);
             }
         };
         setTimeout(handleRun,0);
     }
+
 
     tryToImportToDb(mess) {
         console.log(mess);
         return new Promise((resolve, reject) => {
             if (mess.eventType.toString() === 'delete') {
                 //try to delete
-                console.log(mess);
                 CurveStatus.findOneAndDelete({path: mess.curvePath}, (err, rs)=>{
                     console.log(rs);
                     if (err) {
@@ -47,6 +48,9 @@ class CurveStatusController {
                         reject(err);
                     } else {
                         console.log('deleted');
+                        this.deleteOutputQueue.enqueue(JSON.stringify(mess)).catch((e)=>{
+                            console.log('Enqueue delete curve event into mongo queue failed:', e.message);
+                        });
                         resolve(null);
                     }
                 });
@@ -56,14 +60,17 @@ class CurveStatusController {
                         reject(err);
                     } else {
                         if (rs) {
-                            rs.updatedAt = new Date(mess.updatedAt);
-                            rs.save((err)=>{
-                                if (err) {
-                                    reject(err);
-                                } else {
-                                    resolve(null);
-                                }
-                            });
+                            let dateInMess = new Date(mess.updatedAt);
+                            if (dateInMess.getTime() > new Date(rs.updatedAt).getTime()) {
+                                rs.updatedAt = dateInMess;
+                                rs.save((err)=>{
+                                    if (err) {
+                                        reject(err);
+                                    } else {
+                                        resolve(null);
+                                    }
+                                });
+                            }
                         } else {
                             let newCurvePath = new CurveStatus({
                                 path: mess.curvePath,
@@ -85,9 +92,4 @@ class CurveStatusController {
     }
 }
 
-
-
-
-let controller = new CurveStatusController();
-
-module.exports = controller;
+module.exports = CurveStatusController;

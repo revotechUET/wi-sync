@@ -2,10 +2,9 @@ let mqtt = require('mqtt');
 let getClientId = require('./../helper/getClientId.helper');
 
 class MqttUploader {
-    constructor(database) {
-        this.queue = [];
-        this.channel = "syncUp/";
-        this.database = database;
+    constructor(channel, mongoQueue) {
+        this.queue = mongoQueue;
+        this.channel = channel;
         this.connectState = false;
         this.client = mqtt.connect(require("config").get("mqtt.cloud"), {rejectUnauthorized: false});
         this.client.on('connect', ()=>{
@@ -31,24 +30,24 @@ class MqttUploader {
 
     run() {
         let self = this;
-        let handleRun = async function() {
-            if (self.queue.length > 0) {
-                let data = self.queue.pop();
-                self.client.publish(self.channel + self.database, data.toString(), {qos: 2}, (err) => {
-                    if (err) self.queue.push(data);
+        let handleRun = function() {
+            let data = self.queue.dequeue();
+            if (data) {
+                self.client.publish(self.channel, data.toString(), {qos: 2}, (err) => {
+                    if (err) {
+                        //donothing
+                    } else {
+                        self.queue.deleteTail();
+                    }
                     if (self.connectState) {
                         setTimeout(handleRun, 0);
                     }
                 });
             } else {
-                setTimeout(handleRun,50);
+                setTimeout(handleRun, 1000);
             }
         };
         setTimeout(handleRun,0);
-    }
-
-    push(value) {
-        this.queue.unshift(value);
     }
 
 }

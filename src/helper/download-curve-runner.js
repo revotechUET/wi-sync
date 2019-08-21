@@ -4,10 +4,11 @@ let fs = require('fs');
 let unzip = require('unzip-stream');
 
 let curveBaseFolder = process.env.BACKEND_CURVE_BASE_PATH || config.curveBasePath;
+let transferServerPath = process.env.TRANSFER_SERVER || config.dataProviderServer;
 
 function getCurveFiles(curvePaths) {
     return axios({
-        url: config.get("curveProviderServer") + '/curve/download',
+        url: transferServerPath + '/curve/download',
         method: 'post',
         data: {
             curveFiles: curvePaths

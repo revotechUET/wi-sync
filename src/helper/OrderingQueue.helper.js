@@ -2,6 +2,7 @@ class OrderingQueue {
     constructor(mongoQueue) {
         this.queue = [];
         this.mongoQueue = mongoQueue;
+        this.run();
     }
 
     run() {
@@ -14,11 +15,11 @@ class OrderingQueue {
                     setTimeout(handleRun,0);
 
                 } catch (e) {
-                    console.log('Error when trying to enqueue into mongo queue');
-                    process.exit(1);
+                    console.log('Error when trying to enqueue into mongo queue:', e.message);
+                    console.log('YOU SHOULD CLOSE THE SYNC APP AND RE-SYNC BECAUSE THIS IS AN IMPORTANT ERROR');
                 }
             } else {
-                setTimeout(handleRun,50);
+                setTimeout(handleRun, 500);
             }
         };
         setTimeout(handleRun,0);

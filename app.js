@@ -196,14 +196,18 @@
 
     let nodeLocal = mongoose.model('NodeLocal', NodeSchema);
     let nodeCloud = mongoose.model('NodeCloud', NodeSchema);
+    let nodeCurveDelete = monogoose.model('CurveDeleteQueue', NodeSchema);
+    
     let MongoQueue = require("./src/MongoQueue/mongo.queue");
 
     let localQueue = new MongoQueue(nodeLocal);
     let cloudQueue = new MongoQueue(nodeCloud);
+    let curveDeleteQueue = new MongoQueue(nodeCurveDelete);
     //load queue from database
     try {
         await localQueue.initLoad();
         await cloudQueue.initLoad();
+        await curveDeleteQueue.initLoad();
     } catch(err) {
         console.log(err);
         return;
@@ -212,10 +216,8 @@
     console.log('Mongo queue init successfully');
 
     let OrderingQueue = require('./src/helper/OrderingQueue.helper');
-    //let orderingQueueLocal = new OrderingQueue(localQueue);
+    let orderingQueueLocal = new OrderingQueue(localQueue);
     let orderingQueueCloud = new OrderingQueue(cloudQueue);
-    //orderingQueueLocal.run();
-    orderingQueueCloud.run();
 
 
     let getClientId = require('./src/helper/getClientId.helper');
@@ -226,14 +228,21 @@
     let MqttListener = require('./src/MqttListener/MqttListener');
     let CurveMqttListener = require('./src/MqttListener/CurveMqttListener');
     let MqttUploader = require('./src/MqttUploader/MqttUploader');
-    let curveStatusController = require('./src/CurveStatusUpdater/CurveStatusController');
-    console.log(databaseName);
+    
+    let CurveStatusController = require('./src/CurveStatusUpdater/CurveStatusController');
+    let curveStatusController = CurveStatusController(curveDeleteQueue);
+    
+    console.log('Start sync server with:', databaseName);
 
-    let localMqttQueue = new MqttUploader(databaseName);
+    let CurveGarbageCollector = require('./src/CurveStatusUpdater/CurveGarbageCollector');
+    let curveGarbageCollector = new CurveGarbageCollector();
 
     //new MqttListener(orderingQueueLocal, config.get("mqtt.local"), {clean: false, clientId: getClientId()});
-    new MqttListener(localMqttQueue, config.get("mqtt.local"), {clean: false, clientId: getClientId()});
-    new MqttListener(orderingQueueCloud, config.get("mqtt.cloud"), {clean: false, clientId: getClientId(), rejectUnauthorized: false});
+    new MqttUploader('syncUp/' + databaseName, localQueue);
+    new MqttUploader('curve/delete', curveDeleteQueue);
+    new MqttListener(orderingQueueLocal, config.get("mqtt.local"), {clean: false, clientId: getClientId()}, 'sync');
+    new MqttListener(orderingQueueCloud, config.get("mqtt.cloud"), {clean: false, clientId: getClientId(), rejectUnauthorized: false}, 'sync');
+    new MqttListener(curveGarbageCollector, config.get("mqtt.cloud"), {clean: false, clientId: getClientId() + 'curveChannel', rejectUnauthorized: false}, 'curve/delete');
     new CurveMqttListener(curveStatusController, config.get("mqtt.local"), {clean: false, clientId: getClientId() + 'curveChannel', rejectUnauthorized: false});
 
     let MySqlExecutor = require("./src/MySqlExecutor/mysqlExecutor");
