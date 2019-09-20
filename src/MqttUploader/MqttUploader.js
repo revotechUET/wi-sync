@@ -26,6 +26,7 @@ class MqttUploader {
 
     setStateOff() {
         this.connectState = false;
+
     }
 
     run() {
@@ -33,11 +34,15 @@ class MqttUploader {
         let handleRun = function() {
             let data = self.queue.dequeue();
             if (data) {
-                self.client.publish(self.channel, data.toString(), {qos: 2}, (err) => {
+                self.client.publish(self.channel, data.toString(), {qos: 2}, async (err) => {
                     if (err) {
-                        //donothing
+                        console.log(err.message);
                     } else {
-                        self.queue.deleteTail();
+                        try {
+                            await self.queue.deleteTail();
+                        } catch (e) {
+                            console.log('delete tail:', e);
+                        }
                     }
                     if (self.connectState) {
                         setTimeout(handleRun, 0);

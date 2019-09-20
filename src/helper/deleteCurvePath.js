@@ -1,3 +1,4 @@
+const fs = require('fs');
 module.exports = function deleteFolderRecursive(path) {
 	let files = [];
 	if (fs.existsSync(path)) {

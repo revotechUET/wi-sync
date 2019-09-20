@@ -29,12 +29,11 @@ function uploadCurves(curvePaths, curveUpdateInfo) {
         }
 
         output.on('finish', () => {
-            console.log('finish');
+            console.log('finish upload curve file');
             let uploadFile = new FormData();
             let file = fs.createReadStream(outputName);
             uploadFile.append('curve', file);
             uploadFile.append('curveInfo', JSON.stringify(curveUpdateInfo));
-            console.log(uploadFile.getHeaders());
             axios.post(
                 transferServerPath + '/curve/upload', 
                 uploadFile,
@@ -54,7 +53,7 @@ function uploadCurves(curvePaths, curveUpdateInfo) {
                 reject(e);
             });
         });
-
+        
         archive.finalize().catch((err)=>{
             reject(err);
         });

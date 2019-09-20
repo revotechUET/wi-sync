@@ -2,11 +2,13 @@ let config = require('config');
 let axios = require('axios');
 let fs = require('fs');
 let unzip = require('unzip-stream');
+let divideArr = require('./divideArr.helper');
 
 let curveBaseFolder = process.env.BACKEND_CURVE_BASE_PATH || config.curveBasePath;
 let transferServerPath = process.env.TRANSFER_SERVER || config.dataProviderServer;
 
 function getCurveFiles(curvePaths) {
+    console.log(curvePaths);
     return axios({
         url: transferServerPath + '/curve/download',
         method: 'post',
@@ -73,6 +75,7 @@ function downloadCurveRunner(curvePaths, pathNumber, maxiumTrialTimeOption)  {
 }
 
 function downloadCurves(curvesPathArrs) {
+    curvesPathArrs = divideArr(curvesPathArrs, 100);
     let n = curvesPathArrs.length;
     for (let i = 0; i < n; i++) {
         downloadCurveRunner(curvesPathArrs[i], i)

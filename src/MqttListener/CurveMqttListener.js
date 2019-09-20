@@ -1,11 +1,12 @@
 const mqtt = require('mqtt');
 
 class CurveMqttListener {
-    constructor(output, url, options) {
+    constructor(output, url, options, username) {
         this.url = url;
         this.options = options;
         this.output = output;
         this.client = mqtt.connect(url, options);
+        this.username = username;
         this.assign();
         this.timeStamp = 0;
     }
@@ -40,13 +41,13 @@ class CurveMqttListener {
                 console.log('Mqtt connection error:', e.message);
             }
         });
-        this.client.subscribe("curve/delete", {qos:2});
-        this.client.subscribe("curve/update", {qos:2});
+        this.client.subscribe("curve/delete/" + this.username, {qos:2});
+        this.client.subscribe("curve/update/" + this.username, {qos:2});
         this.client.on('message', (topic, payload)=>{
-            console.log('received');
-            if (topic.toString() === "curve/delete") {
+            console.log(payload.toString());
+            if (topic.toString().indexOf("curve/delete") === 0) {
                 this.output.pushDeleteEvent(JSON.parse(payload.toString()));
-            } else if (topic.toString() === "curve/update") {
+            } else if (topic.toString().indexOf("curve/update") === 0) {
                 this.output.pushUpdateEvent(JSON.parse(payload.toString()));
             }
         });

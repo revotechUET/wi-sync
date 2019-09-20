@@ -1,6 +1,8 @@
+const config = require('config');
+
 let curveBaseFolder = process.env.BACKEND_CURVE_BASE_PATH || config.curveBasePath;
 const deleteCurveFile = require('./../helper/deleteCurvePath');
-const CurveStatus = require('./curve-status.model');
+const CurveStatus = require('./curve-status.model').model;
 
 class CurveGarbageCollector {
     constructor() {
@@ -9,9 +11,10 @@ class CurveGarbageCollector {
     }
 
     collectorRunner() {
+        let self = this;
         let handleRun = function() {
-            if (this.queue.length > 0) {
-                let path = this.queue.pop().curvePath;
+            if (self.queue.length > 0) {
+                let path = JSON.parse(self.queue.pop()).curvePath;
                 let fullPath = curveBaseFolder + path;
                 deleteCurveFile(fullPath);
                 CurveStatus.findOneAndDelete({

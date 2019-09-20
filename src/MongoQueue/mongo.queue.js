@@ -105,7 +105,7 @@ class MongoQueue {
                         }
                     });
                 }
-                else if (this.tail.previous.toString()=== this.head._id.toString()) {
+                else if (this.tail.previous.toString() === this.head._id.toString()) {
                     this.Node.findByIdAndDelete(this.tail._id,(err)=>{
                         if (err) {
                             reject(err);
@@ -146,7 +146,7 @@ class MongoQueue {
                     });
                 }
             } else {
-                reject('Nothing to delete');
+                reject({message: 'Nothing to delete'});
             }
         });
     }

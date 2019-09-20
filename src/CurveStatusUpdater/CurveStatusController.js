@@ -24,10 +24,11 @@ class CurveStatusController {
                 let data = self.queue.pop();
                 try {
                     await self.tryToImportToDb(data);
+                    setTimeout(handleRun,0);
                 } catch (e) {
                     console.log(e.message);
+                    setTimeout(handleRun, 1000);
                 }
-                setTimeout(handleRun,0);
             } else {
                 setTimeout(handleRun, 1000);
             }

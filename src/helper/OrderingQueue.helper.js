@@ -13,7 +13,6 @@ class OrderingQueue {
                 try {
                     await self.mongoQueue.enqueue(data);
                     setTimeout(handleRun,0);
-
                 } catch (e) {
                     console.log('Error when trying to enqueue into mongo queue:', e.message);
                     console.log('YOU SHOULD CLOSE THE SYNC APP AND RE-SYNC BECAUSE THIS IS AN IMPORTANT ERROR');
