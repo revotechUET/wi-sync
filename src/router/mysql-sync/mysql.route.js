@@ -21,12 +21,12 @@ let mySqlCloudConfig = {
 const router = express.Router();
 
 
-route.post('/sync-from-base', async(req,res)=>{
-    let username = req.body.username;
-    let cloudFile = await apiFunc.exportToFile(mySqlCloudConfig, mySqlCloudConfig.prefix + username);
-    let localFile = await apiFunc.exportToFile(mySqlLocalConfig, mySqlLocalConfig.prefix + username);
-    let linkMerged = await apiFunc.mergeFile(localFile, cloudFile);
+// route.post('/sync-from-base', async(req,res)=>{
+//     let username = req.body.username;
+//     let cloudFile = await apiFunc.exportToFile(mySqlCloudConfig, mySqlCloudConfig.prefix + username);
+//     let localFile = await apiFunc.exportToFile(mySqlLocalConfig, mySqlLocalConfig.prefix + username);
+//     let linkMerged = await apiFunc.mergeFile(localFile, cloudFile);
 
-});
+// });
 
 module.exports = router;

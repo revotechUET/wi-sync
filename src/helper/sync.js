@@ -1,12 +1,12 @@
-const apiFunc = require('./src/router/mysql-sync/mysql.api');
-let uploadCurve = require('./src/helper/upload-curve');
-const divideArr = require('./src/helper/divideArr.helper');
-const downloadCurves = require('./src/helper/download-curve-runner');
-let getCurve = require('./src/helper/get-curve');
+const apiFunc = require('../router/mysql-sync/mysql.api');
+let uploadCurve = require('./upload-curve');
+const divideArr = require('./divideArr.helper');
+const downloadCurves = require('./download-curve-runner');
+let getCurve = require('./get-curve');
 
 
-(async function() {
-    let userName = process.argv.slice(2)[0];
+module.exports = async function(userName) {
+    //let userName = process.argv.slice(2)[0];
     const config = require('config');
 
     let mySqlLocalConfig = {
@@ -28,33 +28,34 @@ let getCurve = require('./src/helper/get-curve');
     try {
         let databaseName = mySqlLocalConfig.prefix + userName;
         console.log('Start sync database of user', userName);
-        console.log("Start clone local database...");
-        let localSqlFile = await apiFunc.exportToFile(mySqlLocalConfig, databaseName);
-        console.log("Finish clone local database");
+        // console.log("Start clone local database...");
+        // let localSqlFile = await apiFunc.exportToFile(mySqlLocalConfig, databaseName);
+        // console.log("Finish clone local database");
         console.log("Start clone cloud database...");
         let cloudSqlFile = await apiFunc.exportToFile(mySqlCloudConfig, databaseName);
+        cloudSqlFile = './extracts/' + cloudSqlFile;
         console.log("Finish clone cloud database");
         console.log("Start clean local database...");
         await apiFunc.cleanDatabase(mySqlLocalConfig, databaseName);
         console.log('Finish clean local database');
-        console.log("Start merge local and base...");
-        let mergedFile = await apiFunc.mergeFile(localSqlFile, cloudSqlFile);
-        console.log('Finish merge');
+        // console.log("Start merge local and base...");
+        // let mergedFile = await apiFunc.mergeFile(localSqlFile, cloudSqlFile);
+        // console.log('Finish merge');
         console.log("Start import new database to local");
-        await apiFunc.importToDatabase(mySqlLocalConfig, databaseName, mergedFile);
+        await apiFunc.importToDatabase(mySqlLocalConfig, databaseName, cloudSqlFile);
         console.log('Finish sync');
         console.log('Cleaning temp file...');
         let fs = require('fs');
-        fs.unlinkSync(mergedFile);
+        fs.unlinkSync(cloudSqlFile);
         console.log('Finish clean temp file');
         console.log('Start searching curve exist in database...');
         let curvePaths = await getCurve(config.get("mysql.local"), userName);
         console.log('Start download curve...');
-        let smallerCurvePaths = divideArr(curvePaths, 100);
-        downloadCurves(smallerCurvePaths);
+        //let smallerCurvePaths = divideArr(curvePaths, 100);
+        downloadCurves(curvePaths);
     } catch (e) {
         console.log('Error in sync: ', e);
         console.log('Sync failed')
         console.log('Closed');
     }
-})();
+};

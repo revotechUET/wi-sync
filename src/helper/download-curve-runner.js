@@ -42,7 +42,7 @@ function downloadCurveRunner(curvePaths, pathNumber, maxiumTrialTimeOption)  {
                     });
                     unzipProcesss.on('close', ()=>{
                         try {
-                            fs.unlinkSync(path);
+                            //fs.unlinkSync(path);
                             resolve(null);
                         } catch (e) {
                             console.log(e.message);

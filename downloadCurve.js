@@ -8,7 +8,6 @@ let config = require('config');
 // });
 
 
-
 axios({
     url: config.curveProviderServer + '/curve/download',
     method: 'post',

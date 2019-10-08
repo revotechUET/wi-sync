@@ -2,7 +2,7 @@
   "mysql": {
     "local": {
       "host": "127.0.0.1",
-      "port": "3306",
+      "port": "30336",
       "user": "i2g",
       "password": "qwertyuiop",
       "prefix": "wi1004_"
@@ -18,13 +18,14 @@
   "mongo": {
     "host": "127.0.0.1",
     "port": "27017",
-    "queueDataBase": "syncMysqlQueue"
+    "queueDataBase": "sync"
   },
   "mqtt": {
-    "local": "mqtt://localhost:1883",
+    "local": "mqtt://localhost:30883",
     "cloud": "wss://mqtt-broker.i2g.cloud"
   },
   "curveBasePath": "D:/code/widata/curves",
   "dataProviderServer": "http://118.70.171.246:30010",
-  "syncServer": "http://192.168.0.87:3029"
+  "syncServer": "http://192.168.0.87:3029",
+  "authServer": "httt://127.0.0.1:30000"
 }

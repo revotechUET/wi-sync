@@ -1,7 +1,8 @@
 const mqtt = require('mqtt');
 //let prefix = require('config').get("Database.prefix");
+let getClientId = require('./../helper/getClientId.helper');
 
-class MqttListener {
+class MqttListenerWithoutCollapse {
     
     constructor(output, url, options, subcribeChannel) {
         this.url = url;
@@ -11,6 +12,7 @@ class MqttListener {
         this.subcribeChannel = subcribeChannel || 'sync/#';
         this.assign();
         this.timeStamp = 0;
+        this.clientId = getClientId();
     }
 
     reconnect() {
@@ -47,10 +49,15 @@ class MqttListener {
             console.log('start listen to', this.subcribeChannel, 'with option:', this.options);
         });
         this.client.on('message', (topic, payload)=>{
-            console.log(payload.toString());
-            this.output.push(payload.toString());
+            //console.log(payload.toString());
+            payload = JSON.parse(payload.toString());
+            if (payload.clientId == this.clientId) {
+                //ignore
+            } else {
+                this.output.push(payload.data);
+            }
         });
     }
 }
 
-module.exports = MqttListener;
+module.exports = MqttListenerWithoutCollapse;

@@ -1,285 +1,65 @@
-// const express = require('express');
-//
-// const app = express();
-// const bodyParser = require('body-parser');
-//
-// const apiFunc = require('./src/router/mysql-sync/mysql.api');
-//
-// const exec = require('./src/helper/shellExec.helper');
+const sync = require('./main-run');
 
-// const port = process.env.PORT || 3035;
-//
-// const mysqlApi = require('./src/router/mysql-sync/mysql.route');
-//
-// app.use(bodyParser.urlencoded({ extended: false }));
-//
-// app.use(bodyParser.json());
-//
-// app.use('/mysql', mysqlApi);
-//
-// app.listen(port, () => {
-//     console.log('App listening in port ', port);
-// });
-
-// (async function() {
-//     let userName = process.argv.slice(2)[0];
-//     const config = require('config');
-//
-//     let mySqlLocalConfig = {
-//         host: process.env.LOCAL_HOST || config.get("mysql.local.host"),
-//         port: process.env.LOCAL_PORT || config.get("mysql.local.port"),
-//         user: process.env.LOCAL_USER || config.get("mysql.local.user"),
-//         password: process.env.LOCAL_PASSWORD || config.get("mysql.local.password"),
-//         prefix: process.env.LOCAL_PREFIX || config.get("mysql.local.prefix")
-//     };
-//
-//     let mySqlCloudConfig = {
-//         host: process.env.CLOUD_HOST || config.get("mysql.cloud.host"),
-//         port: process.env.CLOUD_PORT || config.get("mysql.cloud.port"),
-//         user: process.env.CLOUD_USER || config.get("mysql.cloud.user"),
-//         password: process.env.CLOUD_PASSWORD || config.get("mysql.cloud.password"),
-//         prefix: process.env.CLOUD_PREFIX || config.get("mysql.cloud.prefix")
-//     };
-//
-//     try {
-//         let syncUsername = mySqlLocalConfig.prefix + userName;
-//         console.log('Start sync database of user', userName);
-//         console.log("Start clone local database...");
-//         let localSqlFile = await apiFunc.exportToFile(mySqlLocalConfig, syncUsername);
-//         console.log("Finish clone local database");
-//         console.log("Start clone cloud database...");
-//         let cloudSqlFile = await apiFunc.exportToFile(mySqlCloudConfig, syncUsername);
-//         console.log("Finish clone cloud database");
-//         console.log("Start clean local database...");
-//         await apiFunc.cleanDatabase(mySqlLocalConfig, syncUsername);
-//         console.log('Finish clean local database');
-//         console.log("Start merge local and base...");
-//         let mergedFile = await apiFunc.mergeFile(localSqlFile, cloudSqlFile);
-//         console.log('Finish merge');
-//         console.log("Start import new database to local");
-//         await apiFunc.importToDatabase(mySqlLocalConfig, syncUsername, mergedFile);
-//         console.log('Finish sync');
-//         console.log('Cleaning temp file...');
-//         let fs = require('fs');
-//         fs.unlinkSync(mergedFile);
-//         console.log('Finish clean temp file');
-//     } catch (e) {
-//         console.log('Error in sync: ', e);
-//         console.log('Sync failed')
-//         console.log('Closed');
-//     }
-// })();
-
-// function updateToCloud(connection, payload) {
-//     return new Promise((rel, rej)=>{
-//         connection.execute(payload, (err, res)=>{
-//             if (err) {
-//                 rej(err);
-//             } else {
-//                 rel(0);
-//             }
-//         });
-//     });
-// }
-
-// function run(store, connections) {
-//     return new Promise((resolve,reject)=>{
-//         // // let interval = setInterval(()=>{
-//         // //   if (!store.state) {
-//         // //     clearInterval(interval);
-//         // //     resolve(true);
-//         // //   }
-//         // //   else if (store.queue.length > 0) {
-//         // //     let data = store.queue.pop();
-//         // //     client.publish(pushChanel,JSON.stringify(data),{qos:2},(err)=>{
-//         // //       if (err) store.queue.push(data);
-//         // //     });
-//         // //   }
-//         // },200);
-//         let handleRun = function() {
-//             if (store.length > 0) {
-//                 let stmt = store.shift();
-//                 connections.execute(stmt, (err, res)=>{
-//                     if(err) {
-//                         console.log(err);
-//                     }
-//                 });
-//             }
-//             setTimeout(handleRun,10);
-//         }
-//         setTimeout(handleRun,10);
-//     });
-// }
-
-// (async function () {
-//     let mqtt = require('mqtt');
-//
-//     let queue = [];
-//     let queueCloud = [];
-//
-//     let mysql2 = require('mysql2');
-//     let config = require('config').get("mysql.cloud");
-//
-//     const connections = await mysql2.createPool({
-//         host: config.host,
-//         user: config.user,
-//         password: config.password,
-//         port: config.port,
-//         database: 'wi1004_phuc',
-//         connectionLimit: 15,
-//         queueLimit: 30
-//     });
-//
-//
-//     let client = mqtt.connect('mqtt://localhost:1883', {clientId: "LOCAL_CLIENT" + new Date().toString(), clean: false});
-//     let clientCloud = mqtt.connect('wss://mqtt-broker.i2g.cloud', {clientId: "LOCAL_CLIENT_TEST", clean: false, rejectUnauthorized: false}, (err)=>{
-//         console.log(err);
-//     });
-//
-//
-//     client.subscribe('sync/#', {qos: 2});
-//     clientCloud.subscribe('sync/#', {qos: 2});
-//
-//     clientCloud.on('connect', ()=>{
-//         console.log('cloud connected');
-//     });
-//
-//     client.on('message', (topic, payload) => {
-//         let index = topic.indexOf('/');
-//         topic = topic.slice(index+1);
-//         // console.log(topic+':', payload.toString());
-//         queue.push(payload.toString());
-//     });
-//
-//     clientCloud.on('message', (topic, payload) => {
-//         let index = topic.indexOf('/');
-//         topic = topic.slice(index+1);
-//         console.log(topic+':', payload.toString());
-//         queueCloud.push(payload.toString());
-//     });
-//
-//     client.on('connect', ()=>{
-//        console.log('mqtt connected');
-//     });
-//
-//     run(queue, connections);
-//
-//     // if (connection == null) return;
-//
-// })();
-
-// let client = require('mqtt').connect('mqtt://localhost:1883', {clientId: "LOCAL_CLIENT" + new Date().toString(), clean: false});
-//
-// client.subscribe('sync/#');
-// client.on('message', (topic, payload)=>{
-//     topic = topic.slice(5);
-//     console.log(topic + ':', payload.toString());
-// });
+let mongoUrl = "mongodb://";
+let config = require("config");
+mongoUrl = mongoUrl + config.get("mongo.host") + ":" + config.get("mongo.port") + "/" + config.get("mongo.queueDataBase");
+let mongoose = require('mongoose');
+let SyncList = require('./src/model/sync_user.model');
 
 (async function() {
-    let mongoUrl = "mongodb://";
-
-    let config = require("config");
-
-    let getSyncDatabaseName = require('./src/helper/getSyncDatabaseName.helper');
-    let syncUsername = getSyncDatabaseName();
-    
-    mongoUrl = mongoUrl + config.get("mongo.host") + ":" + config.get("mongo.port") + "/" + config.get("mongo.queueDataBase") + '_' + syncUsername;
-
-    const mongoose = require('mongoose');
-    const NodeSchema = require('./src/MongoQueue/mongo.model');
-    //connect mongo
+    //console.log(mongoUrl);
     try {
         await mongoose.connect(mongoUrl, {useNewUrlParser: true});
-
     } catch (err) {
         console.log('Mongo database out of reach');
         return;
     }
 
-    let nodeLocal = mongoose.model('NodeLocal', NodeSchema);
-    let nodeCloud = mongoose.model('NodeCloud', NodeSchema);
-    let nodeCurveDelete = mongoose.model('CurveDeleteQueue', NodeSchema);
-    
-    let MongoQueue = require("./src/MongoQueue/mongo.queue");
+    console.log('Start synchronize server...');
 
-    let localQueue = new MongoQueue(nodeLocal);
-    let cloudQueue = new MongoQueue(nodeCloud);
-    let curveDeleteQueue = new MongoQueue(nodeCurveDelete);
-    //load queue from database
-    try {
-        await localQueue.initLoad();
-        await cloudQueue.initLoad();
-        await curveDeleteQueue.initLoad();
-    } catch(err) {
-        console.log(err);
-        return;
-    }
+    SyncList.find({}, (err, results)=>{
+        
+        if (err) {
+            console.log('Error when get sync list');
+            return -1;
+        }
 
-    console.log('Mongo queue init successfully');
+        if (!results) {
+            console.log('Error when get sync list');
+            return -1;
+        }
 
-    let OrderingQueue = require('./src/helper/OrderingQueue.helper');
-    let orderingQueueLocal = new OrderingQueue(localQueue);
-    let orderingQueueCloud = new OrderingQueue(cloudQueue);
+        for (let i = 0; i < results.length; i++) {
+            try {
+                sync(results[i].username);
+            } catch (e) {
+                console.log(e);
+            }
+        }
 
+        const express = require('express');
 
-    let getClientId = require('./src/helper/getClientId.helper');
+        const app = express();
+        const bodyParser = require('body-parser');
+        const cors = require('cors');
 
-    let MqttListener = require('./src/MqttListener/MqttListener');
-    let CurveMqttListener = require('./src/MqttListener/CurveMqttListener');
-    let MqttUploader = require('./src/MqttUploader/MqttUploader');
-    
-    let CurveStatusController = require('./src/CurveStatusUpdater/CurveStatusController');
-    let curveStatusController = new CurveStatusController(curveDeleteQueue);
-    
-    console.log('Start sync server with:', syncUsername);
+        const port = process.env.PORT || 9099;
 
-    let CurveGarbageCollector = require('./src/CurveStatusUpdater/CurveGarbageCollector');
-    let curveGarbageCollector = new CurveGarbageCollector();
-    let CurveUpdater = require('./src/CurveStatusUpdater/CurveUpdater');
+        app.use(bodyParser.urlencoded({ extended: false }));
 
-    //new MqttListener(orderingQueueLocal, config.get("mqtt.local"), {clean: false, clientId: getClientId()});
-    new MqttUploader('syncUp/' + syncUsername, localQueue);
-    new MqttUploader('curve/delete/' + syncUsername, curveDeleteQueue);
-    new MqttListener(orderingQueueLocal, config.get("mqtt.local"), 
-                    {clean: false, clientId: getClientId() + '_' + syncUsername}, 
-                    'sync/' + syncUsername, false);
-    new MqttListener(orderingQueueCloud, config.get("mqtt.cloud"), 
-                    {clean: false, clientId: getClientId() + '_' + syncUsername, rejectUnauthorized: false},
-                    'sync/' + syncUsername, true);
-    new MqttListener(curveGarbageCollector, config.get("mqtt.cloud"), 
-                    {clean: false, clientId: getClientId() + '_' + 'curveChannel' + '_' + syncUsername, rejectUnauthorized: false},
-                    'curve/delete/' + syncUsername, true);
-    new CurveMqttListener(curveStatusController, config.get("mqtt.local"),
-                         {clean: false, clientId: getClientId() + '_' + 'curveChannel' + '_' + syncUsername},
-                         syncUsername);
-    new CurveUpdater(syncUsername);
+        app.use(bodyParser.json());
 
-    let MySqlExecutor = require("./src/MySqlExecutor/mysqlExecutor");
+        app.use(cors());
 
-    // let cloudSqlConfig = {
-    //     host: config.get("mysql.cloud.host"),
-    //     port: config.get("mysql.cloud.port"),
-    //     user: config.get("mysql.cloud.user"),
-    //     password: config.get("mysql.cloud.password"),
-    //     database: config.get("mysql.cloud.prefix") + syncUsername
-    // };
+        const mysqlApi = require('./src/router/mysql-sync/mysql.route');
+        
+        app.use('/mysql', mysqlApi);
+        app.use('/sync', require('./src/router/sync/sync.route'));
 
-    let localSqlConfig = {
-        host: config.get("mysql.local.host"),
-        port: config.get("mysql.local.port"),
-        user: config.get("mysql.local.user"),
-        password: config.get("mysql.local.password"),
-        database: config.get("mysql.local.prefix") + syncUsername
-    };
-
-    // let cloudMySqlExecutor = new MySqlExecutor(cloudSqlConfig, localQueue);
-    let localMySqlExecutor = new MySqlExecutor(localSqlConfig, cloudQueue);
-
-    // cloudMySqlExecutor.run();
-    localMySqlExecutor.run();
-
-    console.log('Start synchronize server');
+        app.listen(port, () => {
+            console.log('App listening in port ', port);
+        });
+    });
 
 })();
 

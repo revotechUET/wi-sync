@@ -69,6 +69,7 @@ class MySqlExecutor {
         let retry = 0;
         let handleRun = async () => {
             let sqlData = this.queue.dequeue();
+            //console.log('sqlData:', sqlData);
             if (sqlData !== null) {
                 try {
                     await this.execute(sqlData);
@@ -85,10 +86,10 @@ class MySqlExecutor {
                             retry = 0;
                         }
                     }
-                    setTimeout(handleRun, 200);
+                    setTimeout(handleRun, 1000);
                 }
             } else {
-                setTimeout(handleRun, 100);
+                setTimeout(handleRun, 2000);
             }
         };
         setTimeout(handleRun, 0);
